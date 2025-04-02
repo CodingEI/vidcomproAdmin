@@ -529,7 +529,7 @@ $(".start-order").click(function (e) {
   if (value != "") {
     $.ajax({
       type: "POST",
-      url: "/api/webapi/admin/change",
+      url: "/api/webapi/admin/win/wingo",
       data: {
         value: value,
         game: game,
