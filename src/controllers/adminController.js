@@ -3573,17 +3573,13 @@ async function adminWinWingo(req,res){
       );
     }
 
-    // // Fetching the period
-    // const [k3] = await connection.query(
-    //   `SELECT * FROM k3 WHERE status = 0 AND game = ${payload?.game} ORDER BY id DESC LIMIT 2`
-    // );
-
     const [winGoNow] = await connection.query(
           "SELECT period FROM wingo WHERE status = 0 AND game = ? ORDER BY id DESC LIMIT 1",
           [payload?.game],
         );
 
     let winGoNowInfo = winGoNow[0]; // give the current bet period
+    console.log("winGoNowInfo----", winGoNowInfo)
 
     // checking if the game_type is not within the array values
     if (
@@ -3602,8 +3598,6 @@ async function adminWinWingo(req,res){
       value = 'd'
     }
 
-    console.log("value----",value)
-
     // Winning the bet
     await connection.execute(
       `UPDATE minutes_1 
@@ -3616,7 +3610,7 @@ async function adminWinWingo(req,res){
 
     // Updating the table k3 result with status 2 to those which admin didn't set to win
     await connection.execute(
-      `UPDATE result_k3 
+      `UPDATE minutes_1 
       SET status = 2 
       WHERE status = ? 
         AND game = ? 
@@ -3629,6 +3623,8 @@ async function adminWinWingo(req,res){
       "SELECT * FROM `minutes_1` WHERE `stage` = ?",
       [winGoNowInfo?.period]
     );
+    console.log("current_period_bet====", current_period_bet);
+
 
     // filter all the bet with status = 1
     const all_winning_bet = current_period_bet.filter(
@@ -3640,7 +3636,7 @@ async function adminWinWingo(req,res){
     for (let bet of all_winning_bet) {
       // `get` is a reserved keyword in MySQL, so you need to enclose it in backticks (`) to use it as a column name
       await connection.execute(
-        `UPDATE result_k3 
+        `UPDATE minutes_1 
           SET \`get\` = ?   
           WHERE status = ? AND bet = ? AND stage= ?`,
         [bet?.money * 2, 1, bet?.bet, winGoNowInfo?.period]
