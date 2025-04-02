@@ -3594,11 +3594,11 @@ async function adminWinWingo(req,res){
 
     let value;
     // making the bet key as per the game
-    if('x' === payload?.value){
+    if('g' === payload?.value){
       value = 'x'
-    }else if('t' === payload?.value){
+    }else if('v' === payload?.value){
       value = 't'
-    }else if('d' === payload?.value){
+    }else if('r' === payload?.value){
       value = 'd'
     }
 
