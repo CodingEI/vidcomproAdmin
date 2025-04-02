@@ -528,7 +528,7 @@ $(".start-order").click(function (e) {
   // }
   if (value != "") {
     $.ajax({
-      type: "POST",
+      type: "PATCH",
       url: "/api/webapi/admin/win/wingo",
       data: {
         value: value,
