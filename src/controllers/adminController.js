@@ -3602,6 +3602,8 @@ async function adminWinWingo(req,res){
       value = 'd'
     }
 
+    console.log("value----",value)
+
     // Winning the bet
     await connection.execute(
       `UPDATE minutes_1 

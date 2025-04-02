@@ -1407,7 +1407,7 @@ const initWebRouter = (app) => {
     adminController.middlewareAdminController,
     adminController.changeAdmin,
   ); // get info account
-  router.post(
+  router.patch(
     "/api/webapi/admin/win/wingo",
     adminController.middlewareAdminController,
     adminController.adminWinWingo,
