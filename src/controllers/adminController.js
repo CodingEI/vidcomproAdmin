@@ -3553,7 +3553,11 @@ const deleteBanner = async (req, res, next) => {
   });
 };
 
-
+/**
+ * Function to win the wingo game by admin
+ * @param {*string} game ["wingo10","wingo","wingo3","wingo5"]
+ * @param {*string} value - bet which will win 
+ */
 async function adminWinWingo(req,res){
   try {
     const payload = req.body;
@@ -3562,60 +3566,50 @@ async function adminWinWingo(req,res){
     // checking if any of the key is missing
     if (
       !payload?.game ||
-      !payload?.join_bet ||
-      !payload?.game_type ||
       !payload?.value
     ) {
       throw new Error(
-        "The fields 'game', 'join_bet', 'game_type' and 'value' are required."
+        "The fields 'game', and 'value' are required."
       );
     }
 
-    // Fetching the period
-    const [k3] = await connection.query(
-      `SELECT * FROM k3 WHERE status = 0 AND game = ${payload?.game} ORDER BY id DESC LIMIT 2`
-    );
+    // // Fetching the period
+    // const [k3] = await connection.query(
+    //   `SELECT * FROM k3 WHERE status = 0 AND game = ${payload?.game} ORDER BY id DESC LIMIT 2`
+    // );
 
-    let k3Info = k3[0]; // give the current bet period
-    console.log("k3Info", k3Info);
+    const [winGoNow] = await connection.query(
+          "SELECT period FROM wingo WHERE status = 0 AND game = ? ORDER BY id DESC LIMIT 1",
+          [payload?.game],
+        );
 
-    // taking the value
-    let value = payload?.value;
-    console.log("value---", value);
+    let winGoNowInfo = winGoNow[0]; // give the current bet period
 
     // checking if the game_type is not within the array values
     if (
-      !["total", "three-same", "unlike", "two-same"].includes(payload?.game_type)
+      !["wingo10","wingo","wingo3","wingo5"].includes(payload?.game)
     ) {
       throw new Error("Invalid or empty bet values.");
     }
-    
-    // checking which game_type make the bet data
-    if("unlike" === payload?.game_type){
-        if("win" === value || "lose" === value){
-          value = "@u@";
-        }
-        else if(value.length === 5){
-          value = value + "@y@";  // appending the string with @y@
-        }else if(payload?.value.length === 3){
-          value = "@y@" + payload?.value;  // appending the string with @y@
-        }
-    }else if("three-same" === payload?.game_type){ // condition is for three-same
-      if("3" === value){
-         value = "@3"
-      }
+
+    let value;
+    // making the bet key as per the game
+    if('x' === payload?.value){
+      value = 'x'
+    }else if('t' === payload?.value){
+      value = 't'
+    }else if('d' === payload?.value){
+      value = 'd'
     }
 
     // Winning the bet
     await connection.execute(
-      `UPDATE result_k3 
+      `UPDATE minutes_1 
        SET status = 1 
        WHERE status = ? 
          AND game = ? 
-         AND join_bet = ? 
-         AND typeGame = ? 
          AND bet = ?`,
-      [0, payload?.game, payload?.join_bet, payload?.game_type, value]
+      [0, payload?.game, value]
     );
 
     // Updating the table k3 result with status 2 to those which admin didn't set to win
@@ -3624,16 +3618,14 @@ async function adminWinWingo(req,res){
       SET status = 2 
       WHERE status = ? 
         AND game = ? 
-        AND join_bet = ? 
-        AND typeGame = ? 
         AND bet != ?`,
-      [0, payload?.game, payload?.join_bet, payload?.game_type, value]
+      [0, payload?.game, value]
     );
 
     // get all the bet with respect to the current period
     const [current_period_bet] = await connection.execute(
-      "SELECT * FROM `result_k3` WHERE `stage` = ?",
-      [k3Info?.period]
+      "SELECT * FROM `minutes_1` WHERE `stage` = ?",
+      [winGoNowInfo?.period]
     );
 
     // filter all the bet with status = 1
@@ -3649,7 +3641,7 @@ async function adminWinWingo(req,res){
         `UPDATE result_k3 
           SET \`get\` = ?   
           WHERE status = ? AND bet = ? AND stage= ?`,
-        [bet?.money * 2, 1, bet?.bet, k3Info?.period]
+        [bet?.money * 2, 1, bet?.bet, winGoNowInfo?.period]
       );
     }
 
