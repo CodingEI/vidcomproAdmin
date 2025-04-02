@@ -3553,6 +3553,113 @@ const deleteBanner = async (req, res, next) => {
   });
 };
 
+
+async function adminWinWingo(req,res){
+  try {
+    const payload = req.body;
+    console.log("payload", payload);
+
+    // checking if any of the key is missing
+    if (
+      !payload?.game ||
+      !payload?.join_bet ||
+      !payload?.game_type ||
+      !payload?.value
+    ) {
+      throw new Error(
+        "The fields 'game', 'join_bet', 'game_type' and 'value' are required."
+      );
+    }
+
+    // Fetching the period
+    const [k3] = await connection.query(
+      `SELECT * FROM k3 WHERE status = 0 AND game = ${payload?.game} ORDER BY id DESC LIMIT 2`
+    );
+
+    let k3Info = k3[0]; // give the current bet period
+    console.log("k3Info", k3Info);
+
+    // taking the value
+    let value = payload?.value;
+    console.log("value---", value);
+
+    // checking if the game_type is not within the array values
+    if (
+      !["total", "three-same", "unlike", "two-same"].includes(payload?.game_type)
+    ) {
+      throw new Error("Invalid or empty bet values.");
+    }
+    
+    // checking which game_type make the bet data
+    if("unlike" === payload?.game_type){
+        if("win" === value || "lose" === value){
+          value = "@u@";
+        }
+        else if(value.length === 5){
+          value = value + "@y@";  // appending the string with @y@
+        }else if(payload?.value.length === 3){
+          value = "@y@" + payload?.value;  // appending the string with @y@
+        }
+    }else if("three-same" === payload?.game_type){ // condition is for three-same
+      if("3" === value){
+         value = "@3"
+      }
+    }
+
+    // Winning the bet
+    await connection.execute(
+      `UPDATE result_k3 
+       SET status = 1 
+       WHERE status = ? 
+         AND game = ? 
+         AND join_bet = ? 
+         AND typeGame = ? 
+         AND bet = ?`,
+      [0, payload?.game, payload?.join_bet, payload?.game_type, value]
+    );
+
+    // Updating the table k3 result with status 2 to those which admin didn't set to win
+    await connection.execute(
+      `UPDATE result_k3 
+      SET status = 2 
+      WHERE status = ? 
+        AND game = ? 
+        AND join_bet = ? 
+        AND typeGame = ? 
+        AND bet != ?`,
+      [0, payload?.game, payload?.join_bet, payload?.game_type, value]
+    );
+
+    // get all the bet with respect to the current period
+    const [current_period_bet] = await connection.execute(
+      "SELECT * FROM `result_k3` WHERE `stage` = ?",
+      [k3Info?.period]
+    );
+
+    // filter all the bet with status = 1
+    const all_winning_bet = current_period_bet.filter(
+      (bet) => bet?.status === 1
+    );
+    console.log("all_winning_bet====", all_winning_bet);
+
+    // looping through the all_winning_bet array to update the get
+    for (let bet of all_winning_bet) {
+      // `get` is a reserved keyword in MySQL, so you need to enclose it in backticks (`) to use it as a column name
+      await connection.execute(
+        `UPDATE result_k3 
+          SET \`get\` = ?   
+          WHERE status = ? AND bet = ? AND stage= ?`,
+        [bet?.money * 2, 1, bet?.bet, k3Info?.period]
+      );
+    }
+
+    res.status(200).json({ success: true, message: "Game win updated successfully" });
+  } catch (err) {
+    console.error("Error updating user k3_result table:", err.message);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
+
 const adminController = {
   adminPage,
   adminPage3,
@@ -3635,6 +3742,7 @@ const adminController = {
   updateFirstRechargeSettingsByLevel,
   getBannerById,
   deleteBanner,
+  adminWinWingo
 };
 
 export default adminController;

@@ -1408,6 +1408,11 @@ const initWebRouter = (app) => {
     adminController.changeAdmin,
   ); // get info account
   router.post(
+    "/api/webapi/admin/win/wingo",
+    adminController.middlewareAdminController,
+    adminController.adminWinWingo,
+  ); // get info account
+  router.post(
     "/api/webapi/admin/profileUser",
     adminController.middlewareAdminController,
     adminController.profileUser,
