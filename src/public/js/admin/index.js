@@ -531,9 +531,8 @@ $(".start-order").click(function (e) {
       type: "POST",
       url: "/api/webapi/admin/change",
       data: {
-        type: "change-wingo1",
         value: value,
-        typeid: typeid,
+        game: game,
       },
       dataType: "json",
       success: function (response) {
