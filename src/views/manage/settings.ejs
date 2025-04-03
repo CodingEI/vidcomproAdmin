@@ -1,0 +1,1599 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Settings</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"
+    />
+    <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="stylesheet" href="/dist/css/adminlte.min.css" />
+    <link rel="stylesheet" href="/css/admin.css" />
+    <link
+      href="//cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css"
+      rel="stylesheet"
+    />
+
+
+      <!-- jQuery Timepicker Plugin -->
+    
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.css">
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.7/axios.min.js"
+      integrity="sha512-NQfB/bDaB8kaSXF8E77JjhHG5PM6XVRxvHzkZiwl3ddWCEPBa23T76MuWSwAJdMGJnmQqM0VeY9kFszsrBEFrQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <style>
+      .form-group {
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 5px #2ecc71;
+      }
+
+      .form-group button {
+        margin-top: 30px;
+      }
+
+      .upload-container {
+        width: 150px;
+        height: 150px;
+        border: 2px dashed #ccc;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        overflow: hidden;
+        position: relative;
+        background-color: white;
+      }
+      .upload-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+      }
+      .upload-container .plus-icon {
+        font-size: 40px;
+        color: #888;
+        position: absolute;
+      }
+      .upload-container:hover {
+        border-color: #007bff;
+      }
+      input[type="file"] {
+        display: none;
+      }
+
+      .image-container {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      .image-container img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+      }
+      .delete-btn, .usdt-delete-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: white;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
+      }
+
+   .edit-btn, .usdt-edit-btn {
+        position: absolute;
+        top: 10px;
+        right: 45px;
+        background-color: white;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
+      }
+
+      .delete-btn:hover {
+        background-color: rgb(255, 169, 169);
+      }
+
+       .text-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 300px;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+           .text-container .upid-delete-btn, .usdtaddress-delete-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 8px;
+            outline: none;
+            font-size: 12px;;
+        }
+
+        .text-container .upid-edit-btn, .usdtaddress-edit-btn {
+            background-color: orange;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 8px;
+            outline: none;
+            font-size: 12px;;
+            margin-left: auto;
+            margin-right: 6px;
+        }
+
+
+        .form-group button  {
+          margin-top: 0 !important;
+        }
+    </style>
+  </head>
+
+  <body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+      <%- include('nav') %>
+      <div class="content-wrapper">
+        <section class="content-header">
+          <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1>Settings</h1>
+              </div>
+            </div>
+          </div>
+          <!-- /.container-fluid -->
+        </section>
+
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-12">
+              <div style="padding: 10px 20px; margin-bottom: 200px">
+                <!--    <div class="form-group">
+                                    <div class="text-center">
+                                        <label for="quantity">Increase | Drecrease For Members</label>
+                                    </div>
+                                    <input type="text" class="form-control" oninput="value=value.replace(/\D/g,'')"
+                                        id="buff-id" placeholder="Enter account ID"><br>
+                                    <select class="form-select mb-4" id="buff-acc" aria-label="Default select example">
+                                        <option selected value="">----------- Select Function ----------</option>
+                                        <option value="1">Increase (+)</option>
+                                        <option value="2">Drecrease (-)</option>
+                                    </select>
+
+                                    <input type="text" class="form-control" oninput="value=value.replace(/\D/g,'')"
+                                        id="buff-money" placeholder="Enter Amount">
+                                    <button type="submit" class="btn btn-primary" id="buff-username"
+                                        style="width: 100%;">Submit</button>
+                                </div> -->
+
+                <div class="form-group">
+                  <!-- <div class="text-center">
+                                        <label for="quantity">Change Deposit Information</label>
+                                    </div>
+                                    <label for="quantity" style="color: #3498db;">BANKING</label>
+                                    <input type="text" class="form-control" placeholder="Rate"
+                                        id="edit-banking-name_bank" value=""><br>
+                                    <input type="text" class="form-control" placeholder="Enter Account Name"
+                                        id="edit-banking-name" value=""><br>
+                                    <input type="text" class="form-control" placeholder="Enter Account Number"
+                                        id="edit-banking-info" value=""><br>
+                                    <button type="submit" class="btn btn-primary edit-banking"
+                                        style="width: 100%;margin-bottom: 20px;">Submit</button>  -->
+                  <!---------------------------------------------------------------->
+                  <div class="text-center">
+                    <label for="quantity">Manual Settings</label>
+                  </div>
+
+                  <label for="edit-momo-name_bank" style="color: #3498db"
+                    >Rate</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Rate"
+                    id="edit-momo-name_bank"
+                    value=""
+                  /><br />
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Wallet Owner Name"
+                    id="edit-momo-name"
+                    value=""
+                  /><br />
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="UPI ID"
+                    id="edit-momo-info"
+                    value=""
+                  /><br />
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="USDT Wallet Address"
+                    id="edit-momo-qr"
+                    value=""
+                  /><br />
+                  <button
+                    type="submit"
+                    class="btn btn-primary edit-momo"
+                    style="width: 100%"
+                  >
+                    Submit
+                  </button>
+                </div>
+                
+
+                <div class="form-group">
+                  <div class="text-center">
+                    <label for="telegram">Telegram</label>
+                  </div>
+                  <label for="telegram" style="color: #3498db">Telegram</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="telegram"
+                    placeholder="Enter Telegram Link"
+                    value=""
+                  /><br />
+                  <label for="cskh" style="color: #3498db"
+                    >Online Services</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="cskh"
+                    placeholder="Online Services"
+                    value=""
+                  /><br />
+                  <label for="myapp_web" style="color: #3498db"
+                    >App Download Link</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="myapp_web"
+                    placeholder="Enter App Link"
+                    value=""
+                  /><br />
+                  <button
+                    type="submit"
+                    class="btn btn-primary telegram"
+                    style="width: 100%"
+                  >
+                    Submit
+                  </button>
+                </div>
+
+                <div class="form-group">
+                  <div class="text-center">
+                    <label for="telegram">Financial Settings</label>
+                  </div>
+
+                  <div class="row">
+                      <div class="col-md-3">     
+                        <label for="dailyTeamIncomePercentage" style="color: #3498db">Daily Team Income Percentage</label>
+                        <input
+                          type="number"
+                          class="form-control"
+                          id="dailyTeamIncomePercentage"
+                          placeholder="Enter Daily Team Income Percentage"
+                          value=""
+                        /><br />
+                      </div>
+                      
+                       <div class="col-md-3">
+                         <label for="telegram" style="color: #3498db">Daily attendance income (in percentage)</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="dailyAttendanceIncome"
+                            placeholder="Enter Daily Team Income Percentage"
+                            value=""
+                          /><br />
+                      </div>
+
+                      <div class="col-md-3">
+                         <label for="telegram" style="color: #3498db">Attendence Time Range</label>
+                         <div class="d-flex">
+                            <div>
+                              <label for="startTime">Start Time:</label>
+                              <input type="text" name="attendanceStartTime" id="startTime" style="width: 100px; ">
+                            </div>
+                            <div>
+                              <label for="endTime">End Time:</label>
+                              <input type="text" name="attendanceEndTime" id="endTime"style="width: 100px">
+                            </div>
+                          </div>
+                         <br />
+                      </div>
+
+                        <div class="col-md-3">
+                         <label for="telegram" style="color: #3498db">USDT Exchange Rate</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="usdtExchangeRate"
+                            placeholder="Enter Daily Team Income Percentage"
+                            value=""
+                          /><br />
+                      </div>
+
+                      <div class="col-md-3">
+                         <label for="telegram" style="color: #3498db">INR Withdrawal Charges (in percentage)</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="adminWithdrawalCharges"
+                            placeholder="Enter Daily Team Income Percentage"
+                            value=""
+                          /><br />
+                      </div>
+
+                        <div class="col-md-3">
+                         <label for="telegram" style="color: #3498db">USDT Withdrawal Charges (in percentage)</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="adminUsdtWithdrawalCharges"
+                            placeholder="Enter Daily Team Income Percentage"
+                            value=""
+                          /><br />
+                      </div>
+
+                  </div>
+         
+
+                  
+                  
+                  
+                  <button
+                    type="submit"
+                    class="btn btn-primary saveFinancialSetting"
+                    style="width: 100%"
+                  >
+                    Submit
+                  </button>
+                </div>
+
+                <div class="row">
+                 <div class="col-md-6" id="mainWalletReferralLevelIncome">
+                      <div class="form-group">
+                      <div class="text-center">
+                        <label for="telegram">Main Wallet Referral Level Income (in percentage)</label>
+                      </div>
+
+                  <div class="row">
+                    <div class="col-md-2">
+                         <label for="level1" style="color: #3498db">Level 1</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="level1"
+                            placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level2" style="color: #3498db">Level 2</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="level2"
+                              placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level3" style="color: #3498db">Level 3</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="level3"
+                               placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level4" style="color: #3498db">Level 4</label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="level4"
+                              placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level5" style="color: #3498db">Level 5</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="level5"
+                              placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level6" style="color: #3498db">Level 6</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="level6"
+                               placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level7" style="color: #3498db">Level 7</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="level7"
+                              placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level8" style="color: #3498db">Level 8</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="level8"
+                              placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level9" style="color: #3498db">Level 9</label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="level9"
+                             placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level10" style="color: #3498db">Level 10</label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="level10"
+                               placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    class="btn btn-primary mainWalletReferralLevelIncomeSave"
+                    style="width: 100%"
+                  >
+                    Submit
+                  </button>
+                </div>
+                  </div>
+
+                  <div class="col-md-6" id="firstRechargeSettingContainer">
+                      <div class="form-group">
+                      <div class="text-center">
+                        <label for="telegram">First Recharge Settings (in percentage)</label>
+                      </div>
+
+                  <div class="row">
+                    <div class="col-md-2">
+                         <label for="level1" style="color: #3498db">Level 1</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            name="level1"
+                            placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level2" style="color: #3498db">Level 2</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            name="level2"
+                              placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level3" style="color: #3498db">Level 3</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            name="level3"
+                               placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level4" style="color: #3498db">Level 4</label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            name="level4"
+                              placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level5" style="color: #3498db">Level 5</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            name="level5"
+                              placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level6" style="color: #3498db">Level 6</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            name="level6"
+                               placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level7" style="color: #3498db">Level 7</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            name="level7"
+                              placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level8" style="color: #3498db">Level 8</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            name="level8"
+                              placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level9" style="color: #3498db">Level 9</label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            name="level9"
+                             placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                     <div class="col-md-2">
+                         <label for="level10" style="color: #3498db">Level 10</label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            name="level10"
+                               placeholder="Enter value"
+                            value=""
+                          /><br />
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    class="btn btn-primary firstRechargeSettingContainerSubmit"
+                    style="width: 100%"
+                  >
+                    Submit
+                  </button>
+                </div>
+                  </div>
+
+                </div>
+
+
+                
+
+
+
+                 <input type="file" style="display: none;" id="upiImageEditInput" accept="image/*" />
+                  <input type="file" style="display: none;" id="usdtImageEditInput" accept="image/*" />
+
+                <div class="col-12 form-group">
+                  <div class="text-center">
+                    <label for="telegram">UPI Images</label>
+                  </div>
+
+                  <div class="d-flex flex-wrap gap-3">
+                    <% upiImages.forEach((img , index) => { %>
+
+                    <div class="image-container mb-3">
+                      <img
+                        src="/<%= img %>"
+                        alt="Sample Image"
+                      />
+                      <button class="edit-btn" data-index="<%= index %>">
+                       🖊️
+                      </button>
+                      <button class="delete-btn" data-index="<%= index %>">
+                        ❌
+                      </button>
+                    </div>
+
+                 <% }) %>
+                  <div
+                      class="upload-container"
+                      onclick="document.getElementById('fileInput').click()"
+                    >
+                      <span class="plus-icon">+</span>
+                      <input type="file" id="fileInput" accept="image/*" />
+                     
+                    </div>
+                  </div>
+
+                 
+                    
+
+                   
+                  </div>
+
+                    <div class="col-12 form-group">
+                  <div class="text-center">
+                    <label for="telegram">USDT Images</label>
+                  </div>
+
+                  <div class="d-flex flex-wrap gap-3">
+                    <% usdtImages.forEach((img , index) => { %>
+
+                    <div class="image-container mb-3">
+                      <img
+                        src="/<%= img %>"
+                        alt="Sample Image"
+                      />
+                      <button class="usdt-edit-btn" data-index="<%= index %>">
+                       🖊️
+                      </button>
+                      <button class="usdt-delete-btn" data-index="<%= index %>">
+                        ❌
+                      </button>
+                    </div>
+
+                 <% }) %>
+                  
+                   <div
+                      class="upload-container"
+                      onclick="document.getElementById('usdtFileInput').click()"
+                    >
+                      <span class="plus-icon">+</span>
+                      <input type="file" id="usdtFileInput" accept="image/*" />
+                    </div>
+                  </div>
+
+                  </div>
+
+                  <!-- Upi Ids -->
+
+                  <div class="col-6 form-group">
+                  <div class="text-center">
+                    <label for="telegram">UPI Ids</label>
+                  </div>
+
+                  <div class="d-flex flex-wrap gap-3">
+                    <% upiIds.forEach((item , index) => { %>
+
+                    <div class="text-container" id="textBox">
+                <span><%= item %></span>
+                 <button class="upid-edit-btn" data-index="<%= index %>">EDIT</button>
+                  <button class="upid-delete-btn" data-index="<%= index %>">DELETE</button>
+            </div>
+            
+
+                 <% }) %>
+                   
+                </div>
+
+                <div class="col-md-6 mt-3">
+                  <div class="d-flex align-items-center"></div>
+                   <input type="text" class="form-control mb-3" id="newUpiId"  placeholder="Enter UPI ID" value="">
+                   <button type="submit" class="btn btn-primary btn-sm upi-add-btn mt-3" >
+                    ADD
+                  </button>
+                </div>
+             
+
+                </div>
+
+
+
+                 <div class="col-6 form-group">
+                  <div class="text-center">
+                    <label for="telegram">USDT Addresses</label>
+                  </div>
+
+                  <div class="d-flex flex-wrap gap-3">
+                    <% usdtAddreses.forEach((item , index) => { %>
+
+                    <div class="text-container" id="textBox">
+                <span><%= item %></span>
+                <button class="usdtaddress-edit-btn" data-index="<%= index %>">EDIT</button>
+                <button class="usdtaddress-delete-btn" data-index="<%= index %>">DELELTE</button>
+            </div>
+            
+
+                 <% }) %>
+                   
+                </div>
+
+                <div class="col-md-6 mt-3">
+                  <div class="d-flex align-items-center"></div>
+                   <input type="text" class="form-control mb-3" id="newUsdtAddress"  placeholder="Enter USDT Address" value="">
+                   <button type="submit" class="btn btn-primary btn-sm usdtaddress-add-btn mt-3" >
+                    ADD
+                  </button>
+                </div>
+             
+
+                </div>
+
+                
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="/plugins/jquery/jquery.min.js"></script>
+    <script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/dist/js/adminlte.min.js"></script>
+    <script src="/js/admin/admin.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.js"></script>
+    <script>
+      $(document).ready(function() {
+          $('#startTime, #endTime').timepicker({
+              timeFormat: 'H:i',
+             
+              interval: 60,       
+              dynamic: false,
+              dropdown: true,
+              scrollbar: true
+          });
+
+          $('#startTime').on('change', function() {
+              let startTime = $(this).val();
+              $('#endTime').timepicker('option', 'minTime', startTime);
+          });
+      });
+      $.ajax({
+        type: "POST",
+        url: "/admin/manager/settings/get",
+        data: "data",
+        dataType: "json",
+        success: function (response) {
+          let bank = response.datas[0];
+          let momo = response.momo;
+          $("#edit-momo-name_bank").val(momo.bank_name);
+          $("#edit-momo-name").val(momo.username);
+          $("#edit-momo-info").val(momo.upi_id);
+          $("#edit-momo-qr").val(momo.usdt_wallet_address);
+
+          $("#edit-banking-name_bank").val(bank.name_bank);
+          $("#edit-banking-name").val(bank.name_user);
+          $("#edit-banking-info").val(bank.stk);
+          // $('#edit-momo-qr').val(momo.qr_code_image);
+
+          $("#telegram").val(response.settings[0].telegram);
+          $("#cskh").val(response.settings[0].cskh);
+          $("#myapp_web").val(response.settings[0].app);
+
+          // financial settings
+          const financialSettings = response.settings[0].financial_setting ? JSON.parse(response.settings[0].financial_setting) : null;
+          if (financialSettings) {
+            $("#dailyTeamIncomePercentage").val(financialSettings.dailyTeamIncomePercentage);
+            $("#adminWithdrawalCharges").val(financialSettings.adminWithdrawalCharges);
+            $("#adminUsdtWithdrawalCharges").val(financialSettings.adminUsdtWithdrawalCharges);
+            $("#dailyAttendanceIncome").val(financialSettings.dailyAttendanceIncome);
+            $("#usdtExchangeRate").val(financialSettings.usdtExchangeRate);
+            $('input[name=attendanceStartTime]').timepicker('setTime',  financialSettings.attendanceStartTime);
+            $('input[name=attendanceEndTime]').timepicker('setTime',  financialSettings.attendanceEndTime);
+          } 
+          
+          const referralIncomeSettings = response.settings[0].referral_level_income_setting ? JSON.parse(response.settings[0].referral_level_income_setting) : null;
+          if (referralIncomeSettings) {
+            Object.keys(referralIncomeSettings).forEach(key => {
+              $("#mainWalletReferralLevelIncome").find('#' + key).val(referralIncomeSettings[key]);
+            })
+          }
+
+           const firstRechargeSettings = response.settings[0].first_recharge_setting ? JSON.parse(response.settings[0].first_recharge_setting) : null;
+          if (firstRechargeSettings) {
+            Object.keys(firstRechargeSettings).forEach(key => {
+              $("#firstRechargeSettingContainer").find('input[name=' + key + ']').val(firstRechargeSettings[key]);
+            })
+          }
+        },
+      });
+    </script>
+    <script>
+      $("#fileInput").on("change", function (e) {
+        var fileInput = e.target.files[0];
+        if (!fileInput) {
+          alertMessage("Please select an image");
+        }
+
+        var formData = new FormData();
+        formData.append("image", fileInput);
+        formData.append("type", "upi_images");
+        $.ajax({
+          url: "/manager/uploadQrCodes",
+          type: "POST",
+          data: formData,
+          cache: false,
+          processData: false,
+          contentType: false, // Don't set contentType explicitly
+          beforeSend: function () {
+            alertMessage("Updating image...");
+          },
+          success: function (response) {
+            window.location.reload();
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.error("Upload error:", textStatus, errorThrown);
+            alertMessage("Failed to upload image. Please try again.");
+            window.location.reload();
+          },
+        });
+      });
+      $(".delete-btn").click(function() {
+        const index = $(this).data("index");
+        Swal.fire({
+          title: "Do you want to delete the image?",
+         
+          showCancelButton: true,
+          confirmButtonText: "Delete",
+          denyButtonText: `Don't delete`
+        }).then((result) => {
+         
+          if (result.isConfirmed) {
+           $.ajax({
+              url: "/manager/deleteQrCodes",
+              type: "POST",
+              data: {
+                index: index,
+                type: "upi_images"
+              },
+              
+              success: function (response) {
+                window.location.reload();
+              },
+              
+            });
+          } 
+        });
+      })
+
+      $(".edit-btn").click(function() {
+        $(".edit-btn").removeClass("pressed");
+        $(this).addClass("pressed");
+        $("#upiImageEditInput").trigger("click");
+      })
+
+      $("#upiImageEditInput").on("change", function (e) {
+        var fileInput = e.target.files[0];
+        if (!fileInput) {
+          alertMessage("Please select an image");
+        }
+
+        var formData = new FormData();
+        formData.append("image", fileInput);
+        formData.append("type", "upi_images");
+        formData.append("index", $(".edit-btn.pressed").data("index"));
+        $.ajax({
+          url: "/manager/updateQrCodes",
+          type: "POST",
+          data: formData,
+          cache: false,
+          processData: false,
+          contentType: false, // Don't set contentType explicitly
+          beforeSend: function () {
+            alertMessage("Updating image...");
+          },
+          success: function (response) {
+            Swal.fire({
+              title: "Image updated successfully.",
+              icon: "success",
+              draggable: false
+            }).then(() => {
+              window.location.reload();
+            });
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+          
+          },
+        });
+      });
+
+      //
+
+ $(".usdt-edit-btn").click(function() {
+        $(".usdt-edit-btn").removeClass("pressed");
+        $(this).addClass("pressed");
+        $("#usdtImageEditInput").trigger("click");
+      })
+
+      $("#usdtImageEditInput").on("change", function (e) {
+        var fileInput = e.target.files[0];
+        if (!fileInput) {
+          alertMessage("Please select an image");
+        }
+
+        var formData = new FormData();
+        formData.append("image", fileInput);
+        formData.append("type", "usdt_images");
+        formData.append("index", $(".usdt-edit-btn.pressed").data("index"));
+        $.ajax({
+          url: "/manager/updateQrCodes",
+          type: "POST",
+          data: formData,
+          cache: false,
+          processData: false,
+          contentType: false, // Don't set contentType explicitly
+          beforeSend: function () {
+            alertMessage("Updating image...");
+          },
+          success: function (response) {
+            Swal.fire({
+              title: "Image updated successfully.",
+              icon: "success",
+              draggable: false
+            }).then(() => {
+              window.location.reload();
+            });
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+          
+          },
+        });
+      });
+      //
+
+
+
+
+
+      $("#usdtFileInput").on("change", function (e) {
+        var fileInput = e.target.files[0];
+        if (!fileInput) {
+          alertMessage("Please select an image");
+        }
+
+        var formData = new FormData();
+        formData.append("image", fileInput);
+        formData.append("type", "usdt_images");
+        $.ajax({
+          url: "/manager/uploadQrCodes",
+          type: "POST",
+          data: formData,
+          cache: false,
+          processData: false,
+          contentType: false, // Don't set contentType explicitly
+          beforeSend: function () {
+            alertMessage("Updating image...");
+          },
+          success: function (response) {
+            window.location.reload();
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.error("Upload error:", textStatus, errorThrown);
+            alertMessage("Failed to upload image. Please try again.");
+            window.location.reload();
+          },
+        });
+      });
+      $(".usdt-delete-btn").click(function() {
+        const index = $(this).data("index");
+        Swal.fire({
+          title: "Do you want to delete the image?",
+         
+          showCancelButton: true,
+          confirmButtonText: "Delete",
+          denyButtonText: `Don't delete`
+        }).then((result) => {
+         
+          if (result.isConfirmed) {
+           $.ajax({
+              url: "/manager/deleteQrCodes",
+              type: "POST",
+              data: {
+                index: index,
+                type: "usdt_images"
+              },
+              
+              success: function (response) {
+                window.location.reload();
+              },
+              
+            });
+          } 
+        });
+      })
+//
+
+
+ $(".upi-add-btn").on("click", function (e) {
+        var input = $("#newUpiId").val();
+        if (!input) {
+          alertMessage("Please enter upi id");
+        }
+
+        $.ajax({
+          url: "/manager/updateUpiUsdtIds",
+          type: "POST",
+          data: {
+            type:"upi_ids",
+            input
+          },
+    
+          beforeSend: function () {
+            alertMessage("Updating image...");
+          },
+          success: function (response) {
+            window.location.reload();
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.error("Upload error:", textStatus, errorThrown);
+            alertMessage("Failed to upload image. Please try again.");
+            window.location.reload();
+          },
+        });
+      });
+      $(".upid-delete-btn").click(function() {
+        const index = $(this).data("index");
+        Swal.fire({
+          title: "Do you want to delete the UPI ID?",
+         
+          showCancelButton: true,
+          confirmButtonText: "Delete",
+          denyButtonText: `Don't delete`
+        }).then((result) => {
+         
+          if (result.isConfirmed) {
+           $.ajax({
+              url: "/manager/deleteUpiUsdtId",
+              type: "POST",
+              data: {
+                index: index,
+                type: "upi_ids"
+
+              },
+              
+              success: function (response) {
+                window.location.reload();
+              },
+              
+            });
+          } 
+        });
+      })
+
+      //
+
+      $(".usdtaddress-add-btn").on("click", function (e) {
+        var input = $("#newUsdtAddress").val();
+        if (!input) {
+          alertMessage("Please enter upi id");
+        }
+
+        $.ajax({
+          url: "/manager/updateUpiUsdtIds",
+          type: "POST",
+          data: {
+            type:"usdt_addresses",
+            input
+          },
+    
+          beforeSend: function () {
+            alertMessage("Updating image...");
+          },
+          success: function (response) {
+            window.location.reload();
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.error("Upload error:", textStatus, errorThrown);
+            alertMessage("Failed to upload image. Please try again.");
+            window.location.reload();
+          },
+        });
+      });
+      $(".usdtaddress-delete-btn").click(function() {
+        const index = $(this).data("index");
+        Swal.fire({
+          title: "Do you want to delete the USDT Address?",
+         
+          showCancelButton: true,
+          confirmButtonText: "Delete",
+          denyButtonText: `Don't delete`
+        }).then((result) => {
+         
+          if (result.isConfirmed) {
+           $.ajax({
+              url: "/manager/deleteUpiUsdtId",
+              type: "POST",
+              data: {
+                index: index,
+                type: "usdt_addresses"
+
+              },
+              
+              success: function (response) {
+                window.location.reload();
+              },
+              
+            });
+          } 
+        });
+      })
+
+      // 
+$(".upid-edit-btn").click(function() {
+        const upiid = $(this).parent().find("span").text();
+        const index = $(this).data("index");
+  
+        Swal.fire({
+            title: "UPI ID",
+            input: "text",
+            inputAttributes: {
+              autocapitalize: "off"
+            },
+            inputValue: upiid,
+            showCancelButton: true,
+            confirmButtonText: "UPDATE",
+            showLoaderOnConfirm: true,
+          
+          }).then((result) => {
+            if (result.isConfirmed) {
+              $.ajax({
+              url: "/manager/editAndupdateUpiUsdtIds",
+              type: "POST",
+              data: {
+                index: index,
+                type: "upi_ids",
+                input: result.value
+              },
+              success: function (response) {
+                window.location.reload();
+              },
+              
+            });
+            }
+          });
+      })
+
+
+
+      $(".usdtaddress-edit-btn").click(function() {
+        const usdtAdd = $(this).parent().find("span").text();
+        const index = $(this).data("index");
+  
+        Swal.fire({
+            title: "USDT Address",
+            input: "text",
+            inputAttributes: {
+              autocapitalize: "off"
+            },
+            inputValue: usdtAdd,
+            showCancelButton: true,
+            confirmButtonText: "UPDATE",
+            showLoaderOnConfirm: true,
+          
+          }).then((result) => {
+            if (result.isConfirmed) {
+              $.ajax({
+              url: "/manager/editAndupdateUpiUsdtIds",
+              type: "POST",
+              data: {
+                index: index,
+                type: "usdt_addresses",
+                input: result.value
+              },
+              success: function (response) {
+                window.location.reload();
+              },
+              
+            });
+            }
+          });
+      })
+
+
+
+      // 
+
+
+
+
+      $(".update-qr").on("click", function () {
+        var fileInput = $("#qr-image")[0].files[0];
+        if (!fileInput) {
+          alertMessage("Please select an image");
+        }
+
+        var formData = new FormData();
+        formData.append("image", fileInput);
+        console.log(fileInput);
+
+        $.ajax({
+          url: "/manager/upload-qrcode",
+          type: "POST",
+          data: formData,
+          cache: false,
+          processData: false,
+          contentType: false, // Don't set contentType explicitly
+          beforeSend: function () {
+            alertMessage("Updating image...");
+          },
+          success: function (response) {
+            window.location.reload();
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.error("Upload error:", textStatus, errorThrown);
+            alertMessage("Failed to upload image. Please try again.");
+            window.location.reload();
+          },
+        });
+      });
+
+      function sendRequest(params1, params2, typer) {
+        $.ajax({
+          type: "POST",
+          url: "/manage/admin/settings",
+          data: {
+            params1: params1,
+            params2: params2,
+            typer: typer,
+          },
+          dataType: "json",
+          success: function (response) {
+            if (response.message == 1) {
+              Swal.fire("Good job!", "You clicked the button!", "success");
+            } else if (response.message == 2) {
+              Swal.fire({
+                icon: "error",
+                title: "Phone number does not exist",
+              });
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "An unknown error !",
+              });
+            }
+          },
+        });
+      }
+
+      function sendRequestBank(
+        name_bank = "",
+        name = "",
+        info = "",
+        qr = "",
+        typer = "",
+      ) {
+        $.ajax({
+          type: "POST",
+          url: "/admin/manager/settings/bank",
+          data: {
+            name_bank: name_bank,
+            name: name,
+            info: info,
+            qr: qr,
+            typer: typer,
+          },
+          dataType: "json",
+          success: function (response) {
+            Swal.fire("Good job!", "Updated Successfully!", "success");
+          },
+        });
+      }
+      $(".buff-money").click(function (e) {
+        e.preventDefault();
+        const phone = $("#buff-phone").val();
+        const money = $("#buff-money").val();
+        const checkMoney = $.isNumeric(money);
+        if (phone && checkMoney) {
+          sendRequest(phone, money, "buff");
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Empty or Wrong Details",
+          });
+        }
+      });
+
+      const alertMessage = (text) => {
+        const msg = document.createElement("div");
+        msg.setAttribute("data-v-1dcba851", "");
+        msg.className = "msg";
+
+        const msgContent = document.createElement("div");
+        msgContent.setAttribute("data-v-1dcba851", "");
+        msgContent.className = "msg-content v-enter-active v-enter-to";
+        msgContent.style = "";
+        msgContent.textContent = text;
+
+        msg.appendChild(msgContent);
+        document.body.appendChild(msg);
+
+        setTimeout(() => {
+          msgContent.classList.remove("v-enter-active", "v-enter-to");
+          msgContent.classList.add("v-leave-active", "v-leave-to");
+
+          setTimeout(() => {
+            document.body.removeChild(msg);
+          }, 100);
+        }, 1000);
+      };
+
+      $(".edit-momo").click(async (e) => {
+        try {
+          e.preventDefault();
+          const bank_name = $("#edit-momo-name_bank").val();
+          const username = $("#edit-momo-name").val();
+          const upi_id = $("#edit-momo-info").val();
+          const usdt_wallet_address = $("#edit-momo-qr").val();
+
+          const response = await axios.post("/admin/manager/settings/bank", {
+            bank_name,
+            username,
+            upi_id,
+            usdt_wallet_address,
+            typer: "momo",
+          });
+
+          if (response?.data?.status === true) {
+            alertMessage(response?.data?.message);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      });
+      $(".edit-banking").click(function (e) {
+        e.preventDefault();
+        const name_bank = $("#edit-banking-name_bank").val();
+        const name = $("#edit-banking-name").val();
+        const info = $("#edit-banking-info").val();
+        sendRequestBank(name_bank, name, info, "bank");
+      });
+      $(".telegram").click(function (e) {
+        e.preventDefault();
+        const telegram = $("#telegram").val();
+        const cskh = $("#cskh").val();
+        const myapp_web = $("#myapp_web").val();
+        $.ajax({
+          type: "POST",
+          url: "/admin/manager/settings/cskh",
+          data: {
+            telegram: telegram,
+            cskh: cskh,
+            myapp_web: myapp_web,
+          },
+          dataType: "json",
+          success: function (response) {
+            if (response.status == true) {
+              Swal.fire(
+                "Good job!",
+                "Your Links Updated Successfully!",
+                "success",
+              );
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Empty or Wrong",
+              });
+            }
+          },
+        });
+      });
+
+      $("#buff-username").click(function (e) {
+        e.preventDefault();
+        let id_user = $("#buff-id").val().trim();
+        let buff_acc = $("#buff-acc").val().trim();
+        let money_value = $("#buff-money").val().trim();
+        if (id_user && buff_acc && money_value) {
+          $.ajax({
+            type: "POST",
+            url: "/admin/manager/settings/buff",
+            data: {
+              id_user: id_user,
+              buff_acc: buff_acc,
+              money_value: money_value,
+            },
+            dataType: "json",
+            success: function (response) {
+              if (response.status == true) {
+                Swal.fire("Good job!", "Data Added Successfully!", "success");
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  title: "User ID does not exist",
+                });
+              }
+            },
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Please enter complete information",
+          });
+        }
+      });
+
+
+
+       $(".saveFinancialSetting").click(function (e) {
+        e.preventDefault();
+        const dailyTeamIncomePercentage = $("#dailyTeamIncomePercentage").val();
+        const adminWithdrawalCharges = $("#adminWithdrawalCharges").val();
+        const adminUsdtWithdrawalCharges = $("#adminUsdtWithdrawalCharges").val();
+        const dailyAttendanceIncome = $("#dailyAttendanceIncome").val();
+        const attendanceStartTime = $("input[name=attendanceStartTime]").val();
+        const attendanceEndTime = $("input[name=attendanceEndTime]").val();
+        const usdtExchangeRate = $("#usdtExchangeRate").val();
+        $.ajax({
+          type: "POST",
+          url: "/admin/manager/settings/updateFinancialSettings",
+          data: {
+          dailyTeamIncomePercentage,
+           adminWithdrawalCharges,
+           adminUsdtWithdrawalCharges,
+           dailyAttendanceIncome,
+           attendanceStartTime,
+           attendanceEndTime,
+           usdtExchangeRate
+          },
+          dataType: "json",
+          success: function (response) {
+            if (response.success == true) {
+              Swal.fire(
+                "Good job!",
+                "Date updated Successfully!",
+                "success",
+              );
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Empty or Wrong",
+              });
+            }
+          },
+        });
+      });
+
+
+       $(".mainWalletReferralLevelIncomeSave").click(function (e) {
+        e.preventDefault();
+        $.ajax({
+          type: "POST",
+          url: "/admin/manager/settings/updateReferralIncomeByLevel",
+          data: {
+           level1: $("#mainWalletReferralLevelIncome").find("#level1").val() ,
+           level2: $("#mainWalletReferralLevelIncome").find("#level2").val() ,
+           level3: $("#mainWalletReferralLevelIncome").find("#level3").val() ,
+           level4: $("#mainWalletReferralLevelIncome").find("#level4").val() ,
+           level5: $("#mainWalletReferralLevelIncome").find("#level5").val() ,
+           level6: $("#mainWalletReferralLevelIncome").find("#level6").val() ,
+           level7: $("#mainWalletReferralLevelIncome").find("#level7").val() ,
+           level8: $("#mainWalletReferralLevelIncome").find("#level8").val() ,
+           level9: $("#mainWalletReferralLevelIncome").find("#level9").val() ,
+           level10:$("#mainWalletReferralLevelIncome").find("#level10").val() ,       
+          },
+          dataType: "json",
+          success: function (response) {
+            if (response.success == true) {
+              Swal.fire(
+                "Good job!",
+                "Date updated Successfully!",
+                "success",
+              );
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Empty or Wrong",
+              });
+            }
+          },
+        });
+      });
+
+
+
+      $(".firstRechargeSettingContainerSubmit").click(function (e) {
+        e.preventDefault();
+        $.ajax({
+          type: "POST",
+          url: "/admin/manager/settings/updateFirstRechargeSettingsByLevel",
+          data: {
+           level1: $("#firstRechargeSettingContainer").find("input[name=level1]").val(),
+           level2: $("#firstRechargeSettingContainer").find("input[name=level2]").val(),
+           level3:  $("#firstRechargeSettingContainer").find("input[name=level3]").val(),
+           level4:  $("#firstRechargeSettingContainer").find("input[name=level4]").val(),
+           level5:  $("#firstRechargeSettingContainer").find("input[name=level5]").val(),
+           level6:  $("#firstRechargeSettingContainer").find("input[name=level6]").val(),
+           level7:  $("#firstRechargeSettingContainer").find("input[name=level7]").val(),
+           level8:  $("#firstRechargeSettingContainer").find("input[name=level8]").val(),
+           level9:  $("#firstRechargeSettingContainer").find("input[name=level9]").val(),
+           level10: $("#firstRechargeSettingContainer").find("input[name=level10]").val(), 
+          },
+          dataType: "json",
+          success: function (response) {
+            if (response.success == true) {
+              Swal.fire(
+                "Good job!",
+                "Date updated Successfully!",
+                "success",
+              );
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Empty or Wrong",
+              });
+            }
+          },
+        });
+      });
+
+
+
+
+    </script>
+  </body>
+</html>

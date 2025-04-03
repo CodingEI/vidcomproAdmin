@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recharge</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"
+    />
+    <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/dist/css/adminlte.min.css" />
+    <link rel="stylesheet" href="/css/admin.css" />
+  </head>
+
+  <body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+      <%- include('nav') %>
+     <div class="content-wrapper">
+        <section class="content-header">
+          <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1>Add Banner</h1>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+          <div class="card">
+            <div class="card-body col-md-6">
+              <form id="bannerForm" method="POST">
+                <div class="mb-3">
+                  <label for="title" class="form-label">Banner Title</label>
+                  <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+
+
+                <div class="mb-3">
+                  <label for="type" class="form-label">Type</label>
+                  <select class="form-control" id="type" name="type" required>
+                    <option value="" selected disabled>Select Type</option>
+                    <option value="homescreen">Homescreen</option>
+                    <option value="activity">Activity Banner</option>
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label for="link" class="form-label">Action Link</label>
+                  <input type="text" class="form-control" id="link" name="link" required>
+                </div>
+
+                
+                <div class="form-group">
+                    <label for="exampleInputFile">File input</label>
+                    <div class="input-group">
+                      <div class="custom-file">
+                        <input type="file" class="custom-file-input"name="image" id="exampleInputFile">
+                        <label class="custom-file-label" for="exampleInputFile">Choose file</label>
+                      </div>
+                      <div class="input-group-append">
+                        <span class="input-group-text">Upload</span>
+                      </div>
+                    </div>
+                  </div>
+
+                <button type="submit" class="btn btn-primary" id="submit">Submit</button>
+              </form>
+            </div>
+          </div>
+         
+        </section>
+      </div>
+    <script src="/plugins/jquery/jquery.min.js"></script>
+    <script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/dist/js/adminlte.min.js"></script>
+    <script src="/js/admin/admin.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <script>
+      function formateT(params) {
+        let result = params < 10 ? "0" + params : params;
+        return result;
+      }
+
+      function timerJoin(params = "", addHours = 0) {
+        let date = "";
+        if (params) {
+          date = new Date(Number(params));
+        } else {
+          date = new Date();
+        }
+
+        date.setHours(date.getHours() + addHours);
+
+        let years = formateT(date.getFullYear());
+        let months = formateT(date.getMonth() + 1);
+        let days = formateT(date.getDate());
+
+        let hours = date.getHours() % 12;
+        hours = hours === 0 ? 12 : hours;
+        let ampm = date.getHours() < 12 ? "AM" : "PM";
+
+        let minutes = formateT(date.getMinutes());
+        let seconds = formateT(date.getSeconds());
+
+        return (
+          years +
+          "-" +
+          months +
+          "-" +
+          days +
+          " " +
+          hours +
+          ":" +
+          minutes +
+          ":" +
+          seconds +
+          " " +
+          ampm
+        );
+      }
+    </script>
+    <script>
+      const PaymentStatusMap = {
+        PENDING: 0,
+        SUCCESS: 1,
+        CANCELLED: 2,
+      };
+
+      const PaymentMethodsMap = {
+        upi_gateway: "UPI GATEWAY",
+        upi_gatewa: "UPI GATEWAY",
+        upi_manual: "UPI Manual",
+        usdt_manual: "USDT Manual",
+        usdt_manua: "USDT Manual",
+        wow_pay: "WOW Pay",
+        rs_pay: "RS Pay",
+        usdt: "USDT",
+      };
+      let isEdit = false;
+      let banner ;
+
+     const initBanner = () => {
+    const searchParams = new URLSearchParams(window.location.search);
+   
+    
+    const bannerId = searchParams.get("bannerId");
+    if (bannerId) {
+        isEdit = true;
+        $.ajax({
+            type: "GET",
+            url: `/admin/manager/getBannerById/${bannerId}`,
+            dataType: "json",
+            success: function (response) {
+              banner = response.banner[0];
+              $("#title").val(response.banner[0].title); 
+              $("#type").val(response.banner[0].type);
+              $("#link").val(response.banner[0].link)
+            
+            },
+            error: function (xhr, status, error) {
+                console.error("Error fetching banner:", error);
+            }
+        });
+    }}
+
+      initBanner()
+    
+
+        $("#bannerForm").on("submit", function (e) {
+          e.preventDefault();
+          let formData = new FormData(this);
+          $.ajax({
+             type: "POST",
+           url: `/admin/manager/saveBanner${isEdit ? `?isEdit=true&bannerId=${banner.id}` : ''}`
+, 
+            data: formData,
+            processData: false,  
+            contentType: false,  
+            dataType: "json",
+            success: function (response) {
+              Swal.fire("Good job!", "Banner has been saved!", "success").then(() => {
+                    window.location.href="/admin/manager/banners"
+              });
+          
+            },
+          });
+        });
+
+    </script>
+  </body>
+</html>

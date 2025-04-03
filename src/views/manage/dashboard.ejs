@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"
+    />
+    <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/dist/css/adminlte.min.css" />
+    <link rel="stylesheet" href="/css/admin.css" />
+  </head>
+
+  <body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+      <%- include('nav') %>
+      <div class="content-wrapper">
+        <section class="content-header">
+          <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1>Dashboard</h1>
+              </div>
+            </div>
+          </div>
+          <!-- /.container-fluid -->
+        </section>
+
+        <div class="px-2 py-4">
+          <div class="row">
+            <div class="col-lg-3 col-6">
+              <!-- small box -->
+              <div class="small-box bg-info">
+                <div class="inner">
+                  <h3><%= activeUsers %></h3>
+                  <p>Active users</p>
+                </div>
+                <div class="icon">
+                  <i class="ion ion-bag"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-6">
+              <!-- small box -->
+              <div class="small-box bg-success">
+                <div class="inner">
+                  <h3><%= todayDeposit %></h3>
+                  <p>Today deposit</p>
+                </div>
+                <div class="icon">
+                  <i class="ion ion-bag"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-6">
+              <!-- small box -->
+              <div class="small-box bg-warning">
+                <div class="inner">
+                  <h3><%= todayWithdraw %></h3>
+                  <p>Today withdrawal</p>
+                </div>
+                <div class="icon">
+                  <i class="ion ion-bag"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-6">
+              <!-- small box -->
+              <div class="small-box bg-info">
+                <div class="inner">
+                  <h3><%= totalUsers %></h3>
+                  <p>Total users</p>
+                </div>
+                <div class="icon">
+                  <i class="ion ion-bag"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-6">
+              <!-- small box -->
+              <div class="small-box bg-success">
+                <div class="inner">
+                  <h3><%= totalDeposit %></h3>
+                  <p>Total deposit</p>
+                </div>
+                <div class="icon">
+                  <i class="ion ion-bag"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-6">
+              <!-- small box -->
+              <div class="small-box bg-info">
+                <div class="inner">
+                  <h3><%= totalWithdraw %></h3>
+                  <p>Total withdrawal</p>
+                </div>
+                <div class="icon">
+                  <i class="ion ion-bag"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main content -->
+      </div>
+    </div>
+    <script src="/plugins/jquery/jquery.min.js"></script>
+    <script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/dist/js/adminlte.min.js"></script>
+    <script src="/js/admin/admin.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <script>
+      function formateT(params) {
+        let result = params < 10 ? "0" + params : params;
+        return result;
+      }
+
+      function timerJoin(params = "", addHours = 0) {
+        let date = "";
+        if (params) {
+          date = new Date(Number(params));
+        } else {
+          date = new Date();
+        }
+
+        date.setHours(date.getHours() + addHours);
+
+        let years = formateT(date.getFullYear());
+        let months = formateT(date.getMonth() + 1);
+        let days = formateT(date.getDate());
+
+        let hours = date.getHours() % 12;
+        hours = hours === 0 ? 12 : hours;
+        let ampm = date.getHours() < 12 ? "AM" : "PM";
+
+        let minutes = formateT(date.getMinutes());
+        let seconds = formateT(date.getSeconds());
+
+        return (
+          years +
+          "-" +
+          months +
+          "-" +
+          days +
+          " " +
+          hours +
+          ":" +
+          minutes +
+          ":" +
+          seconds +
+          " " +
+          ampm
+        );
+      }
+    </script>
+    <script>
+      const PaymentStatusMap = {
+        PENDING: 0,
+        SUCCESS: 1,
+        CANCELLED: 2,
+      };
+
+      const PaymentMethodsMap = {
+        upi_gateway: "UPI GATEWAY",
+        upi_gatewa: "UPI GATEWAY",
+        upi_manual: "UPI Manual",
+        usdt_manual: "USDT Manual",
+        usdt_manua: "USDT Manual",
+        wow_pay: "WOW Pay",
+        rs_pay: "RS Pay",
+        usdt: "USDT",
+      };
+
+      function show(params) {
+        if (params.length == 0) {
+          $("tbody").html(`
+            <tr class="text-center">
+              <td colspan="7">No More...</td>
+            </tr>
+          `);
+          return;
+        }
+
+        let html = params
+          .map((data) => {
+            return `<tr class="text-center">
+                  <td id="${data.id}">
+                    ${data.id}
+                  </td>
+                  <td>
+                    <b>${data.phone}</b>
+                  </td>
+                  <td>
+                    ${data.type == "bank" ? '<b style="color: #3498db">BANKING</b>' : '<b style="color: #a50064">UPI</b>'}
+                  </td>
+                  <td>
+                    <b>${data.money}</b>
+                  </td>
+                  <td style="min-width: 190px;">
+                    <b>${data.id_order}</b>
+                  </td>
+                  <td style="min-width: 190px;">
+                    <b>${data.utr}</b>
+                  </td>
+                  <td style="min-width: 190px;">
+                    <b>${PaymentMethodsMap?.[data.type] ? PaymentMethodsMap?.[data.type] : data.type}</b>
+                  </td>
+                  <td style="min-width: 190px;">
+                    <b>${timerJoin(data.time)}</b>
+                  </td>
+                  <td class="project-state">
+                    <span class="badge badge-warning">Waiting...</span>
+                  </td>
+                  <td class="project-actions text-center" style="min-width: 160px;">
+                    <a class="btn btn-success btn-sm confirm-btn" href="" data="${data.id}"><i class="fa fa-check"></i></a>
+
+                    <a class="btn btn-danger btn-sm delete-btn" href="#" data="${data.id}"><i class="fas fa-trash"></i></a>
+                  </td>
+                </tr>`;
+          })
+          .join("");
+
+        $("tbody").html(html);
+
+        $(".btn-success").off("click.success_recharge");
+        $(".btn-success").on("click.success_recharge", function (e) {
+          e.preventDefault();
+          let id = $(this).attr("data");
+          $.ajax({
+            type: "POST",
+            url: "/api/webapi/admin/recharge/status",
+            data: {
+              id: id,
+              status: PaymentStatusMap.SUCCESS,
+            },
+            dataType: "json",
+            success: function (response) {
+              initRecharge();
+
+              Swal.fire("Good job!", "You Accepted The Recharge!", "success");
+            },
+          });
+        });
+
+        $(".btn-danger").off("click.cancel_recharge");
+        $(".btn-danger").on("click.cancel_recharge", function (e) {
+          e.preventDefault();
+          let id = $(this).attr("data");
+          $.ajax({
+            type: "POST",
+            url: "/api/webapi/admin/recharge/status",
+            data: {
+              id: id,
+              status: PaymentStatusMap.CANCELLED,
+            },
+            dataType: "json",
+            success: function (response) {
+              initRecharge();
+
+              Swal.fire("Good job!", "You Rejected The Recharge!", "success");
+            },
+          });
+        });
+      }
+
+      const initRecharge = () => {
+        $.ajax({
+          type: "GET",
+          url: "/api/webapi/admin/recharge/pending",
+          dataType: "json",
+          success: function (response) {
+            show(response.list);
+          },
+          error: function (response) {
+            console.log(response);
+          },
+        });
+      };
+
+      $.ajax({
+        type: "GET",
+        url: "/api/webapi/admin/recharge/pending",
+        dataType: "json",
+        success: function (response) {
+          show(response.list);
+        },
+        error: function (response) {
+          console.log(response);
+        },
+      });
+
+      initRecharge();
+    </script>
+  </body>
+</html>
