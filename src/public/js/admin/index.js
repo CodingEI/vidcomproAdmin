@@ -516,16 +516,16 @@ $.ajax({
 $(".start-order").click(function (e) {
   e.preventDefault();
   let value = $("#editResult").val();
-  let arr = value.split("|");
-  for (let i = 0; i < arr.length; i++) {
-    let check = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(
-      String(arr[i]),
-    );
-    if (arr[i] == "" || arr[i].length > 1 || !check) {
-      alert("Please enter the correct format (e.g., 1|4|5|1|5)");
-      return false;
-    }
-  }
+  // let arr = value.split("|");
+  // for (let i = 0; i < arr.length; i++) {
+  //   let check = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(
+  //     String(arr[i]),
+  //   );
+  //   if (arr[i] == "" || arr[i].length > 1 || !check) {
+  //     alert("Please enter the correct format (e.g., 1|4|5|1|5)");
+  //     return false;
+  //   }
+  // }
   if (value != "") {
     $.ajax({
       type: "POST",
