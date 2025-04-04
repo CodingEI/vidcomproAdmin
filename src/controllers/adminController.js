@@ -3562,6 +3562,8 @@ async function adminWinWingo(req,res){
   try {
     const payload = req.body;
     console.log("payload", payload);
+    let commission = 35; // commission for the game
+
 
     // checking if any of the key is missing
     if (
@@ -3640,14 +3642,28 @@ value = payload?.value
     );
     console.log("all_winning_bet====", all_winning_bet);
 
+    // filter all the loose bets
+    const all_loose_bet = current_period_bet.filter(bet => bet?.status === 2);
+    console.log("all_loose_bet====", all_loose_bet);
+
     // looping through the all_winning_bet array to update the get
     for (let bet of all_winning_bet) {
       // `get` is a reserved keyword in MySQL, so you need to enclose it in backticks (`) to use it as a column name
       await connection.execute(
         `UPDATE minutes_1 
-          SET \`get\` = ?   
+          SET \`get\` = ?  , commission = ? 
           WHERE status = ? AND bet = ? AND stage= ?`,
-        [bet?.money * 2, 1, bet?.bet, winGoNowInfo?.period]
+        [bet?.money * 2,(bet?.money * 2 * commission)/100, 1, bet?.bet, winGoNowInfo?.period]
+      );
+    }
+
+    // loop through all the loose bet to update the commision 
+    for (let loose_bet of all_loose_bet ){
+      await connection.execute(
+        `UPDATE minutes_1 
+          SET commission = ? 
+          WHERE status = ? AND bet = ? AND stage= ?`,
+        [(loose_bet?.money * commission)/100, 2, loose_bet?.bet, winGoNowInfo?.period]
       );
     }
 

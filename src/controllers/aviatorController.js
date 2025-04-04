@@ -224,6 +224,8 @@ const betNow = async (req, res) => {
           [userId, betAmount, betType, gameId, sectionNo],
         );
 
+        console.log("result----", result)
+
         const betId = result.insertId;
         returnBets.push({ bet_id: betId });
 
@@ -244,6 +246,7 @@ const betNow = async (req, res) => {
       wallet_balance: updatedUserWalletBalance, // Get updated wallet balance
       return_bets: returnBets,
     };
+    console.log("data----", data)
 
     const response = {
       isSuccess: status,
