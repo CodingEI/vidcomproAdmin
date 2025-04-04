@@ -3596,7 +3596,15 @@ async function adminWinWingo(req,res){
       value = 't'
     }else if('r' === payload?.value){
       value = 'd'
-    }
+    }else if("1" === payload?.value || "2" === payload?.value || 
+      "3" === payload?.value || "4" === payload?.value || "5" === payload?.value || "6" === payload?.value
+      || "7" === payload?.value || "8" === payload?.value || "9" === payload?.value || "0" === payload?.value){
+value = payload?.value
+      }else if('b' === payload?.value){
+        value = 'l'
+      }else if('s' === payload?.value){
+      value = 'n'
+      }
 
     // Winning the bet
     await connection.execute(
