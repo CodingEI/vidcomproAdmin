@@ -916,7 +916,7 @@ const initWebRouter = (app) => {
     adminController.addBannerPage,
   );
   router.get(
-    "/admin/wingo/set_commission",
+    "/admin/wingo/get_commission",
     adminController.middlewareAdminController,
     adminController.getAdminSetCommission,
   );
