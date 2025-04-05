@@ -3674,7 +3674,64 @@ value = payload?.value
   }
 }
 
+/**
+ * Function to get the admin commission currently set in the database
+ * @param {*} req 
+ * @param {*} res 
+ */
+async function getAdminSetCommission(req, res) {
+  try {
+    // get the commission from the admin_commission table
+    const [rows] = await connection.query(
+      "SELECT * FROM admin_commission WHERE status = 'active' LIMIT 1"
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: "No active admin commission found." });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: rows[0],
+      message: "Admin commission fetched successfully"
+    });
+  } catch (err) {
+    console.error("Error fetching admin commission:", err.message);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
+
+/**
+ * Function to update the admin commision from the admin commission table
+ */
+async function updateWingoCommissionByAdmin(req,res){
+  try {
+   
+   const {commission} = req.body;
+
+   if (!commission) {
+    return res.status(400).json({ success: false, message: "Commission is required." });
+   }  
+
+    // Perform the update
+     await connection.query(
+      "UPDATE admin_commission SET commission = ? WHERE id = 1 AND status = 'active'",
+      [commission]
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Admin commission updated successfully",
+    });
+  } catch (err) {
+    console.error("Error updating admin commission:", err.message);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
+
+
 const adminController = {
+  updateWingoCommissionByAdmin,
   adminPage,
   adminPage3,
   adminPage5,
@@ -3756,7 +3813,8 @@ const adminController = {
   updateFirstRechargeSettingsByLevel,
   getBannerById,
   deleteBanner,
-  adminWinWingo
+  adminWinWingo,
+  getAdminSetCommission
 };
 
 export default adminController;

@@ -915,6 +915,16 @@ const initWebRouter = (app) => {
     adminController.middlewareAdminController,
     adminController.addBannerPage,
   );
+  router.get(
+    "/admin/wingo/set_commission",
+    adminController.middlewareAdminController,
+    adminController.getAdminSetCommission,
+  );
+  router.patch(
+    "/admin/wingo/update_commission",
+    adminController.middlewareAdminController,
+    adminController.updateWingoCommissionByAdmin,
+  );
   router.post(
     "/admin/manager/saveBanner",
     adminController.middlewareAdminController,

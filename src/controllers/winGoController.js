@@ -1054,6 +1054,7 @@ const handlingWinGo1P = async (typeid) => {
       "SELECT * FROM minutes_1 WHERE status = 0 AND game = ?",
       [game],
     );
+    console.log("order----",order)
 
     for (let i = 0; i < order.length; i++) {
       let orders = order[i];
@@ -1108,12 +1109,40 @@ const batchUpdateBetStatus = async (result, game) => {
   let offset = 0;
 
   while (true) {
+
+
+    // get the row which will be updated by status = 2
+    const [rows_updated__status_2] = await connection.execute(
+      `SELECT * FROM minutes_1 
+       WHERE status = 0 
+         AND game = ? 
+         AND bet NOT IN (${validBets.map(() => "?").join(",")}) 
+       LIMIT ${batchSize}`,
+      [game, ...validBets]
+    );
+
     const [rows] = await connection.execute(
       `UPDATE minutes_1 SET status = 2 
        WHERE status = 0 AND game = ? AND bet NOT IN (${validBets.map(() => "?").join(",")})
        LIMIT ${batchSize}`,
       [game, ...validBets],
     );
+  
+    // get the commision from the admin commision table
+    const [admin_commission] = await connection.execute(
+      `SELECT * FROM admin_commission WHERE status = ?`,
+      ['active']
+    );
+
+    // loop through the rows_updated__status_2 and update the commission
+    for (let each_bet of rows_updated__status_2 ){
+      await connection.execute(
+        `UPDATE minutes_1 
+          SET commission = ? 
+          WHERE bet = ? AND stage = ?`,
+        [(each_bet?.money * admin_commission[0].commission)/100, each_bet?.bet , each_bet?.stage]
+      );
+    }
 
     if (rows.affectedRows === 0) break; // No more rows to update
     offset += batchSize;
