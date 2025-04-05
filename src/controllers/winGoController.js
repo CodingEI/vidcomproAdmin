@@ -1046,7 +1046,7 @@ const handlingWinGo1P = async (typeid) => {
 
     let result = Number(winGoNow[0].amount);
 
-    await batchUpdateBetStatus(result, game);
+    const commission = await batchUpdateBetStatus(result, game);
 
     await generateCommissionsForLost(winGoNow[0].period);
 
@@ -1054,7 +1054,6 @@ const handlingWinGo1P = async (typeid) => {
       "SELECT * FROM minutes_1 WHERE status = 0 AND game = ?",
       [game],
     );
-    console.log("order----",order)
 
     for (let i = 0; i < order.length; i++) {
       let orders = order[i];
@@ -1083,8 +1082,8 @@ const handlingWinGo1P = async (typeid) => {
 
       if (isEligibleForWin) {
         await connection.query(
-          "UPDATE `minutes_1` SET `get` = ?, `status` = 1 WHERE `id` = ?",
-          [parseFloat(winAmount), id],
+          "UPDATE `minutes_1` SET `get` = ?, commission = ? , `status` = 1 WHERE `id` = ?",
+          [parseFloat(winAmount),(total * 2 * commission[0].commission)/100,  id],
         );
 
         await connection.query(
@@ -1107,7 +1106,7 @@ const batchUpdateBetStatus = async (result, game) => {
   const validBets = getValidBets(result);
   const batchSize = 1000; // Adjust this based on your data volume and server capacity
   let offset = 0;
-
+  let admin_commission;
   while (true) {
 
 
@@ -1129,7 +1128,7 @@ const batchUpdateBetStatus = async (result, game) => {
     );
   
     // get the commision from the admin commision table
-    const [admin_commission] = await connection.execute(
+   [admin_commission] = await connection.execute(
       `SELECT * FROM admin_commission WHERE status = ?`,
       ['active']
     );
@@ -1147,6 +1146,7 @@ const batchUpdateBetStatus = async (result, game) => {
     if (rows.affectedRows === 0) break; // No more rows to update
     offset += batchSize;
   }
+  return admin_commission;
 };
 
 const generateCommissionsForLost = async (period) => {
