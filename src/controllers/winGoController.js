@@ -365,125 +365,101 @@ const JOIN_COLOR_MAP = {
 };
 
 const betWinGo = async (req, res) => {
-  try {
-    let { typeid, join, x, money } = req.body;
-    let auth = req.cookies.auth;
+  let { typeid, join, x, money } = req.body;
+  let auth = req.cookies.auth;
 
-    if (typeid != 1 && typeid != 3 && typeid != 5 && typeid != 10) {
-      return res.status(200).json({
-        message: "Error!",
-        status: true,
-      });
-    }
+  if (typeid != 1 && typeid != 3 && typeid != 5 && typeid != 10) {
+    return res.status(200).json({
+      message: "Error!",
+      status: true,
+    });
+  }
 
-    let gameJoin = "";
-    if (typeid == 1) gameJoin = "wingo";
-    if (typeid == 3) gameJoin = "wingo3";
-    if (typeid == 5) gameJoin = "wingo5";
-    if (typeid == 10) gameJoin = "wingo10";
-    const [winGoNow] = await connection.query(
-      "SELECT period FROM wingo WHERE status = 0 AND game = ? ORDER BY id DESC LIMIT 1",
-      [gameJoin],
-    );
-    const [user] = await connection.query(
-      "SELECT `phone`, `code`, `invite`, `level`, `money`, `bonus_money` FROM users WHERE token = ? AND veri = 1  LIMIT 1 ",
-      [auth],
-    );
+  let gameJoin = "";
+  if (typeid == 1) gameJoin = "wingo";
+  if (typeid == 3) gameJoin = "wingo3";
+  if (typeid == 5) gameJoin = "wingo5";
+  if (typeid == 10) gameJoin = "wingo10";
+  const [winGoNow] = await connection.query(
+    "SELECT period FROM wingo WHERE status = 0 AND game = ? ORDER BY id DESC LIMIT 1",
+    [gameJoin],
+  );
+  const [user] = await connection.query(
+    "SELECT `phone`, `code`, `invite`, `level`, `money`, `bonus_money` FROM users WHERE token = ? AND veri = 1  LIMIT 1 ",
+    [auth],
+  );
 
-    const [rechargeCount] = await connection.execute(
-      "SELECT COUNT(*) as rechargeCount FROM recharge WHERE phone = ? AND status = 1",
-      [user[0].phone],
-    );
+  if (!winGoNow[0] || !user[0] || !isNumber(x) || !isNumber(money)) {
+    return res.status(200).json({
+      message: "Error!",
+      status: true,
+    });
+  }
 
-    if ((rechargeCount[0].rechargeCount || 0) === 0) {
-      return res.status(200).json({
-        message: "You must have made at least one deposit to play the game.",
-        status: true,
-      });
-    }
+  const [totalRecharge] = await connection.execute(
+    "SELECT COUNT(*) as count FROM recharge WHERE phone = ? AND status = 1",
+    [user[0].phone],
+  );
 
-    if (!winGoNow[0] || !user[0] || !isNumber(money)) {
-      return res.status(200).json({
-        message: "Error!",
-        status: true,
-      });
-    }
+  if ((totalRecharge[0]?.count || 0) === 0) {
+    return res.status(200).json({
+      message: "You need to deposit funds to place bets.",
+      status: true,
+    });
+  }
 
-    let period = winGoNow[0].period;
-    let userInfo = user[0];
+  let userInfo = user[0];
+  let period = winGoNow[0].period;
+  let fee = x * money * 0.02;
+  let total = x * money - fee;
+  let timeNow = Date.now();
+  let check = userInfo.money - total;
 
-    if (userInfo.restricted == 1) {
-      return res.status(200).json({
-        message: "You are restricted from making bets. Contact support",
-        status: false,
-      });
-    }
+  let date = new Date();
+  let years = formateT(date.getFullYear());
+  let months = formateT(date.getMonth() + 1);
+  let days = formateT(date.getDate());
+  let id_product =
+    years + months + days + Math.floor(Math.random() * 1000000000000000);
 
-    // validate if user already have bet or big or small and betting again
-    if (join == "l" || join == "n") {
-      let betColorToFind = join == "l" ? "n" : "l";
-      const [bigOrSmallbet] = await connection.query(
-        `SELECT bet FROM minutes_1 WHERE status = 0 AND stage = '${period}' AND phone = '${userInfo.phone}' AND bet = '${betColorToFind}'`,
-      );
-      if (bigOrSmallbet && bigOrSmallbet.length > 0) {
-        return res.status(200).json({
-          message: `Error! You can only bet on ${join == "l" ? "Small" : "Big"}.`,
-          status: true,
-        });
-      }
-    }
+  let formatTime = timerJoin();
 
-    let fee = x * money * 0.02;
-    let total = x * money - fee;
-    let timeNow = Date.now();
-    let check = userInfo.money - total;
-    console.log({ fee, total });
+  let color = "";
+  if (join == "l") {
+    color = "big";
+  } else if (join == "n") {
+    color = "small";
+  } else if (join == "t") {
+    color = "violet";
+  } else if (join == "d") {
+    color = "red";
+  } else if (join == "x") {
+    color = "green";
+  } else if (join == "0") {
+    color = "red-violet";
+  } else if (join == "5") {
+    color = "green-violet";
+  } else if (join % 2 == 0) {
+    color = "red";
+  } else if (join % 2 != 0) {
+    color = "green";
+  }
 
-    let date = new Date();
-    let years = formateT(date.getFullYear());
-    let months = formateT(date.getMonth() + 1);
-    let days = formateT(date.getDate());
-    let id_product =
-      years + months + days + Math.floor(Math.random() * 1000000000000000);
+  let checkJoin = "";
 
-    let formatTime = timerJoin();
-
-    let color = "";
-    if (join == "l") {
-      color = "big";
-    } else if (join == "n") {
-      color = "small";
-    } else if (join == "t") {
-      color = "violet";
-    } else if (join == "d") {
-      color = "red";
-    } else if (join == "x") {
-      color = "green";
-    } else if (join == "0") {
-      color = "red-violet";
-    } else if (join == "5") {
-      color = "green-violet";
-    } else if (join % 2 == 0) {
-      color = "red";
-    } else if (join % 2 != 0) {
-      color = "green";
-    }
-
-    let checkJoin = "";
-
-    if ((!isNumber(join) && join == "l") || join == "n") {
-      checkJoin = `
+  if ((!isNumber(join) && join == "l") || join == "n") {
+    checkJoin = `
         <div data-v-a9660e98="" class="van-image" style="width: 30px; height: 30px;">
             <img src="/images/${join == "n" ? "small" : "big"}.png" class="van-image__img">
         </div>
         `;
-    } else {
-      checkJoin = `
+  } else {
+    checkJoin = `
         <span data-v-a9660e98="">${isNumber(join) ? join : ""}</span>
         `;
-    }
+  }
 
-    let result = `
+  let result = `
     <div data-v-a9660e98="" issuenumber="${period}" addtime="${formatTime}" rowid="1" class="hb">
         <div data-v-a9660e98="" class="item c-row">
             <div data-v-a9660e98="" class="result">
@@ -504,48 +480,48 @@ const betWinGo = async (req, res) => {
     </div>
     `;
 
-    function timerJoin(params = "", addHours = 0) {
-      let date = "";
-      if (params) {
-        date = new Date(Number(params));
-      } else {
-        date = new Date();
-      }
-
-      date.setHours(date.getHours() + addHours);
-
-      let years = formateT(date.getFullYear());
-      let months = formateT(date.getMonth() + 1);
-      let days = formateT(date.getDate());
-
-      let hours = date.getHours() % 12;
-      hours = hours === 0 ? 12 : hours;
-      let ampm = date.getHours() < 12 ? "AM" : "PM";
-
-      let minutes = formateT(date.getMinutes());
-      let seconds = formateT(date.getSeconds());
-
-      return (
-        years +
-        "-" +
-        months +
-        "-" +
-        days +
-        " " +
-        hours +
-        ":" +
-        minutes +
-        ":" +
-        seconds +
-        " " +
-        ampm
-      );
+  function timerJoin(params = "", addHours = 0) {
+    let date = "";
+    if (params) {
+      date = new Date(Number(params));
+    } else {
+      date = new Date();
     }
 
-    let checkTime = timerJoin(date.getTime());
+    date.setHours(date.getHours() + addHours);
 
-    if (check >= 0) {
-      const sql = `INSERT INTO minutes_1 SET 
+    let years = formateT(date.getFullYear());
+    let months = formateT(date.getMonth() + 1);
+    let days = formateT(date.getDate());
+
+    let hours = date.getHours() % 12;
+    hours = hours === 0 ? 12 : hours;
+    let ampm = date.getHours() < 12 ? "AM" : "PM";
+
+    let minutes = formateT(date.getMinutes());
+    let seconds = formateT(date.getSeconds());
+
+    return (
+      years +
+      "-" +
+      months +
+      "-" +
+      days +
+      " " +
+      hours +
+      ":" +
+      minutes +
+      ":" +
+      seconds +
+      " " +
+      ampm
+    );
+  }
+
+  let checkTime = timerJoin(date.getTime());
+
+  if (check >= 0) {
+    const sql = `INSERT INTO minutes_1 SET 
         id_product = ?,
         phone = ?,
         code = ?,
@@ -561,68 +537,60 @@ const betWinGo = async (req, res) => {
         status = ?,
         today = ?,
         time = ?`;
-      await connection.query(sql, [
-        id_product,
-        userInfo.phone,
-        userInfo.code,
-        userInfo.invite,
-        period,
-        userInfo.level,
-        total,
-        x,
-        fee,
-        0,
-        gameJoin,
-        join,
-        0,
-        checkTime,
-        timeNow,
-      ]);
+    await connection.query(sql, [
+      id_product,
+      userInfo.phone,
+      userInfo.code,
+      userInfo.invite,
+      period,
+      userInfo.level,
+      total,
+      x,
+      fee,
+      0,
+      gameJoin,
+      join,
+      0,
+      checkTime,
+      timeNow,
+    ]);
 
-      const previous_bonus_money = userInfo.bonus_money;
+    const previous_bonus_money = userInfo.bonus_money;
 
-      const totalBetMoney = money * x;
+    const totalBetMoney = money * x;
+    let mainWalletBetMoney = totalBetMoney * 0.98;
+    let bonusWalletBetMoney = totalBetMoney * 0.02;
 
-      const isBonusWalletEnabled = process.env.ENABLE_BONUS_MONEY === "true";
-
-      let mainWalletBetMoney = isBonusWalletEnabled
-        ? totalBetMoney * 0.97
-        : totalBetMoney;
-      let bonusWalletBetMoney = isBonusWalletEnabled ? totalBetMoney * 0.03 : 0;
-
-      if (!(previous_bonus_money >= bonusWalletBetMoney)) {
-        mainWalletBetMoney = totalBetMoney;
-        bonusWalletBetMoney = 0;
-      }
-
-      await connection.query(
-        "UPDATE users SET money = money - ?, total_money = total_money - ?, bonus_money = bonus_money - ? , is_active = ? WHERE token = ?",
-        [mainWalletBetMoney, mainWalletBetMoney, bonusWalletBetMoney, 1, auth],
-      );
-
-      const [users] = await connection.query(
-        "SELECT `money`, `bonus_money`, `level` FROM users WHERE token = ? AND veri = 1  LIMIT 1 ",
-        [auth],
-      );
-
-      // rosesPlus(auth, money * x);
-
-      return res.status(200).json({
-        message: "Successful bet",
-        status: true,
-        data: result,
-        change: users[0].level,
-        money: users[0].money,
-        bonus_money: users[0].bonus_money,
-      });
-    } else {
-      return res.status(200).json({
-        message: "The amount is not enough",
-        status: false,
-      });
+    if (!(previous_bonus_money >= bonusWalletBetMoney)) {
+      mainWalletBetMoney = totalBetMoney;
+      bonusWalletBetMoney = 0;
     }
-  } catch (er) {
-    console.log(er);
+
+    await connection.query(
+      "UPDATE users SET money = money - ?, total_money = total_money - ?, bonus_money = bonus_money - ? WHERE token = ?",
+      [mainWalletBetMoney, mainWalletBetMoney, bonusWalletBetMoney, auth],
+    );
+
+    const [users] = await connection.query(
+      "SELECT `money`, `bonus_money`, `level` FROM users WHERE token = ? AND veri = 1  LIMIT 1 ",
+      [auth],
+    );
+
+    // rosesPlus(auth, money * x);
+
+    return res.status(200).json({
+      message: "Successful bet",
+      status: true,
+      data: result,
+      change: users[0].level,
+      money: users[0].money,
+      bonus_money: users[0].bonus_money,
+    });
+  } else {
+    return res.status(200).json({
+      message: "The amount is not enough",
+      status: false,
+    });
   }
 };
 const listOrderOld = async (req, res) => {
@@ -1092,6 +1060,8 @@ const handlingWinGo1P = async (typeid) => {
         );
       }
     }
+
+    
 
     await connection.query(
       "UPDATE wingo SET release_status = 2 WHERE period = ? AND game = ?",

@@ -2238,51 +2238,42 @@ const listWithdraw = async (req, res) => {
 const constructTransactionsQuery = (
   filterType = "All",
   startDate,
-  endDate,
   phone,
   limit,
   offset,
 ) => {
   const queries = {
     Bets: {
-      query: `SELECT id_product AS id, (money + fee) AS money, 'negative' AS type, 'Bet' AS name, time FROM minutes_1 WHERE phone = ? AND time >= ? AND time <= ?`,
-      count: `SELECT COUNT(*) AS totalCount FROM minutes_1 WHERE phone = ? AND time >= ? AND time <= ?`,
-    },
-    trxBets: {
-      query: `SELECT id_product AS id, (money + fee) AS money, 'negative' AS type, 'Bet' AS name, time FROM trx_wingo_bets WHERE phone = ? AND time >= ? AND time <= ?`,
-      count: `SELECT COUNT(*) AS totalCount FROM trx_wingo_bets WHERE phone = ? AND time >= ? AND time <= ?`,
+      query: `SELECT id_product AS id, money, 'negative' AS type, 'Bet Charges' AS name, time FROM minutes_1 WHERE phone = ? AND time >= ?`,
+      count: `SELECT COUNT(*) AS totalCount FROM minutes_1 WHERE phone = ? AND time >= ?`,
     },
     "Bet Win": {
-      query: `SELECT id_product AS id, get AS money, 'positive' AS type, 'Win' AS name, time FROM minutes_1 WHERE phone = ? AND get > 0 AND time >= ? AND time <=?`,
-      count: `SELECT COUNT(*) AS totalCount FROM minutes_1 WHERE phone = ? AND get > 0 AND time >= ? AND time <=?`,
-    },
-    "trxBet Win": {
-      query: `SELECT id_product AS id, get AS money, 'positive' AS type, 'Win' AS name, time FROM trx_wingo_bets WHERE phone = ? AND get > 0 AND time >= ? AND time <=?`,
-      count: `SELECT COUNT(*) AS totalCount FROM trx_wingo_bets WHERE phone = ? AND get > 0 AND time >= ? AND time <=?`,
+      query: `SELECT id_product AS id, \`get\` AS money, 'positive' AS type, 'Bet Win' AS name, time FROM minutes_1 WHERE phone = ? AND \`get\` > 0 AND time >= ?`,
+      count: `SELECT COUNT(*) AS totalCount FROM minutes_1 WHERE phone = ? AND \`get\` > 0 AND time >= ?`,
     },
     Recharge: {
-      query: `SELECT id_order AS id, money, 'positive' AS type, 'Recharge' AS name, time FROM recharge WHERE phone = ? AND status = 1 AND time >= ? AND time <=?`,
-      count: `SELECT COUNT(*) AS totalCount FROM recharge WHERE phone = ? AND status = 1 AND time >= ? AND time <=?`,
+      query: `SELECT id_order AS id, money, 'positive' AS type, 'Recharge' AS name, time FROM recharge WHERE phone = ? AND status = 1 AND time >= ?`,
+      count: `SELECT COUNT(*) AS totalCount FROM recharge WHERE phone = ? AND status = 1 AND time >= ?`,
     },
     Withdraw: {
-      query: `SELECT id_order AS id, money, 'negative' AS type, 'Withdraw' AS name, time FROM withdraw WHERE phone = ? AND status = 1 AND time >= ? AND time <=?`,
-      count: `SELECT COUNT(*) AS totalCount FROM withdraw WHERE phone = ? AND status = 1 AND time >= ? AND time <=?`,
+      query: `SELECT id_order AS id, money, 'negative' AS type, 'Withdraw' AS name, time FROM withdraw WHERE phone = ? AND status = 1 AND time >= ?`,
+      count: `SELECT COUNT(*) AS totalCount FROM withdraw WHERE phone = ? AND status = 1 AND time >= ?`,
     },
     Commissions: {
-      query: `SELECT commission_id AS id, SUM(money) AS money, 'positive' AS type, 'Commission' AS name, time FROM commissions WHERE phone = ? AND time >= ? AND time <=? GROUP BY time`,
-      count: `SELECT COUNT(*) AS totalCount FROM (SELECT time FROM commissions WHERE phone = ? AND time >= ? AND time <=? GROUP BY time) AS grouped`,
+      query: `SELECT commission_id AS id, SUM(money) AS money, 'positive' AS type, 'Commission' AS name, time FROM commissions WHERE phone = ? AND time >= ? GROUP BY commission_id, time`,
+      count: `SELECT COUNT(*) AS totalCount FROM (SELECT commission_id, time FROM commissions WHERE phone = ? AND time >= ? GROUP BY commission_id, time) AS grouped`,
     },
     "Gift Vouchers": {
-      query: `SELECT id_redenvelops AS id, money, 'positive' AS type, 'Red Envelopes' AS name, time FROM redenvelopes_used WHERE phone_used = ? AND time >= ? AND time <=?`,
-      count: `SELECT COUNT(*) AS totalCount FROM redenvelopes_used WHERE phone_used = ? AND time >= ? AND time <=?`,
+      query: `SELECT id_redenvelops AS id, money, 'positive' AS type, 'Red Envelopes' AS name, time FROM redenvelopes_used WHERE phone_used = ? AND time >= ?`,
+      count: `SELECT COUNT(*) AS totalCount FROM redenvelopes_used WHERE phone_used = ? AND time >= ?`,
     },
     Salary: {
-      query: `SELECT id, amount AS money, 'positive' AS type, CONCAT(type, ' Salary') AS name, time FROM salary WHERE phone = ? AND time >= ? AND time <=?`,
-      count: `SELECT COUNT(*) AS totalCount FROM salary WHERE phone = ? AND time >= ? AND time <=?`,
+      query: `SELECT id, amount AS money, 'positive' AS type, CONCAT(type, ' Salary') AS name, time FROM salary WHERE phone = ? AND time >= ?`,
+      count: `SELECT COUNT(*) AS totalCount FROM salary WHERE phone = ? AND time >= ?`,
     },
     "Claimed Rewards": {
-      query: `SELECT time AS id, amount AS money, 'positive' AS type, type AS name, time FROM claimed_rewards WHERE phone = ? AND time >= ? AND time <=?`,
-      count: `SELECT COUNT(*) AS totalCount FROM claimed_rewards WHERE phone = ? AND time >= ? AND time <=?`,
+      query: `SELECT time AS id, amount AS money, 'positive' AS type, type AS name, time FROM claimed_rewards WHERE phone = ? AND time >= ?`,
+      count: `SELECT COUNT(*) AS totalCount FROM claimed_rewards WHERE phone = ? AND time >= ?`,
     },
   };
 
@@ -2309,27 +2300,8 @@ const constructTransactionsQuery = (
     const params = Object.values(queries).flatMap((query) => [
       phone,
       startDate,
-      endDate,
     ]);
 
-    return {
-      transactionsQuery,
-      totalCountQuery,
-      params,
-    };
-  }
-  if (filterType === "Bets" || filterType === "Bet Win") {
-    const selectedQuery = `${queries[filterType]?.query || ""} UNION ALL ${queries[`trx${filterType}`]?.query || ""}`;
-    const totalCountQueries = `(${queries[filterType]?.count || "0"}) + (${queries[`trx${filterType}`]?.count || "0"})`;
-
-    const totalCountQuery = `
-       SELECT ${totalCountQueries} AS totalCount
-     `;
-    const transactionsQuery = `${selectedQuery}
-       ORDER BY time DESC
-       LIMIT ${limit} OFFSET ${offset}
-     `;
-    const params = [phone, startDate, endDate, phone, startDate, endDate];
     return {
       transactionsQuery,
       totalCountQuery,
@@ -2347,7 +2319,7 @@ const constructTransactionsQuery = (
          LIMIT ${limit} OFFSET ${offset}
        `;
 
-      const params = [phone, startDate, endDate];
+      const params = [phone, startDate];
 
       return {
         transactionsQuery,
@@ -2361,63 +2333,54 @@ const constructTransactionsQuery = (
 };
 
 const listTransaction = async (req, res) => {
-  try {
-    let auth = req.cookies.auth;
-    if (!auth) {
-      return res.status(200).json({
-        message: "Failed",
-        status: false,
-        timeStamp: new Date().toISOString(),
-      });
-    }
-
-    const [user] = await connection.query(
-      "SELECT `phone`, `code`, `invite` FROM users WHERE `token` = ?",
-      [auth],
-    );
-    let userInfo = user[0];
-    if (!userInfo) {
-      return res.status(200).json({
-        message: "Failed",
-        status: false,
-        timeStamp: new Date().toISOString(),
-      });
-    }
-
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const startDate = Number(req?.query?.startDate) || "";
-    const endDate = startDate
-      ? getDayTime(startDate).endOfDayTimestamp
-      : new Date().getTime();
-
-    const filterType = req.query.filterType || "All";
-    const offset = (page - 1) * limit;
-
-    const { transactionsQuery, totalCountQuery, params } =
-      constructTransactionsQuery(
-        filterType,
-        startDate,
-        endDate,
-        userInfo.phone,
-        limit,
-        offset,
-      );
-
-    const [transactions] = await connection.query(transactionsQuery, params);
-    const [totalCount] = await connection.query(totalCountQuery, params);
-    const totalPages = Math.ceil(totalCount[0].totalCount / limit);
-    res.json({
-      message: "Success",
-      status: true,
-      data: transactions,
-      totalPages: totalPages,
-      currentPage: page,
+  let auth = req.cookies.auth;
+  if (!auth) {
+    return res.status(200).json({
+      message: "Failed",
+      status: false,
       timeStamp: new Date().toISOString(),
     });
-  } catch (err) {
-    console.log("Error from listTransaction: " + err);
   }
+
+  const [user] = await connection.query(
+    "SELECT `phone`, `code`, `invite` FROM users WHERE `token` = ?",
+    [auth],
+  );
+  let userInfo = user[0];
+  if (!userInfo) {
+    return res.status(200).json({
+      message: "Failed",
+      status: false,
+      timeStamp: new Date().toISOString(),
+    });
+  }
+
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const startDate = req.query.startDate || '1970-01-01'; // Default to a very early date if not provided
+  const filterType = req.query.filterType || "All";
+  const offset = (page - 1) * limit;
+
+  const { transactionsQuery, totalCountQuery, params } =
+    constructTransactionsQuery(
+      filterType,
+      startDate,
+      userInfo.phone,
+      limit,
+      offset,
+    );
+
+  const [transactions] = await connection.query(transactionsQuery, params);
+  const [totalCount] = await connection.query(totalCountQuery, params);
+  const totalPages = Math.ceil(totalCount[0].totalCount / limit);
+  res.json({
+    message: "Success",
+    status: true,
+    data: transactions,
+    totalPages: totalPages,
+    currentPage: page,
+    timeStamp: new Date().toISOString(),
+  });
 };
 
 const useRedenvelope = async (req, res) => {
